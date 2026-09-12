@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+  <meta
+    name="description"
+    content="Z Console is a free, local-first practice interface for movement, study, reflection, and deliberate practice."
+  >
+  <title>Z Console</title>
+
+  <style>
+    :root {
+      --bg: #06100e;
+      --panel: #10241e;
+      --line: #31765d;
+      --green: #72ffaf;
+      --lime: #d0ff68;
+      --yellow: #ffe878;
+      --orange: #ff9f55;
+      --red: #ff6870;
+      --purple: #c5a0ff;
+      --blue: #79bdff;
+      --text: #effff6;
+      --muted: #a8c9b7;
+      --dark: #06130f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 50% -5%, #26624688, transparent 34%),
+        linear-gradient(145deg, #030706, #092019 55%, #040908);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1120px, calc(100% - 28px));
+      margin: auto;
+      padding: 24px 0 40px;
+    }
+
+    .head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--lime);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      line-height: 1;
+    }
+
+    .sub {
+      max-width: 720px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .badge,
+    .tag {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #071711;
+      color: var(--green);
+      font-size: 0.75rem;
+      font-weight: 900;
+    }
+
+    .badge {
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 16px;
+    }
+
+    .panel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(180deg, #14382edd, #092019ee);
+      box-shadow: 0 0 22px #5cffaa20;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 0.95rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .console {
+      position: relative;
+      overflow: hidden;
+      margin-top: 14px;
+      padding: 16px;
+      border: 1px solid #72ffafaa;
+      border-radius: 15px;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          #72ffaf10 0 1px,
+          transparent 1px 4px
+        ),
+        var(--dark);
+    }
+
+    .console::after {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, #72ffaf22, transparent);
+      content: "";
+      transform: translateX(-100%);
+      animation: scan 3.6s linear infinite;
+    }
+
+    @keyframes scan {
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+    .label {
+      color: var(--lime);
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+    }
+
+    .power {
+      color: var(--green);
+      font: bold clamp(3.8rem, 10vw, 6.5rem) "Courier New", monospace;
+      letter-spacing: -0.1em;
+      line-height: 0.95;
+      text-shadow: 0 0 16px #72ffaf80;
+    }
+
+    .rank {
+      margin-top: 8px;
+      color: var(--yellow);
+      font-weight: 900;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .mini {
+      padding: 9px;
+      border: 1px solid #72ffaf3d;
+      border-radius: 11px;
+      background: #72ffaf0c;
+    }
+
+    .mini span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.64rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .mini strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.1rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meterbox {
+      margin-top: 15px;
+    }
+
+    .meterrow {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .meter {
+      height: 11px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--dark);
+    }
+
+    .fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--lime), var(--yellow));
+      transition: width 0.4s;
+    }
+
+    .controls {
+      display: grid;
+      gap: 13px;
+      margin-top: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    select {
+      min-height: 44px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #071711;
+      color: var(--text);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--lime);
+    }
+
+    .slider {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .pill {
+      min-width: 76px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--dark);
+      color: var(--lime);
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    .notice {
+      padding: 10px;
+      border: 1px solid #ffe87866;
+      border-radius: 11px;
+      background: #ffe87812;
+      color: #fff2bd;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .notice.safe {
+      border-color: #72ffaf70;
+      background: #72ffaf10;
+      color: #d9ffeb;
+    }
+
+    .notice.danger {
+      border-color: #ff6870aa;
+      background: #ff687015;
+      color: #ffd7da;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 15px;
+    }
+
+    button {
+      min-height: 46px;
+      padding: 10px 13px;
+      border: 0;
+      border-radius: 11px;
+      background: var(--lime);
+      color: #06100b;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      border: 1px solid var(--line);
+      background: #72ffaf12;
+      color: var(--text);
+    }
+
+    button.danger {
+      border: 1px solid #ff6870aa;
+      background: #ff687025;
+      color: #fff;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .mission {
+      min-height: 220px;
+      margin-top: 14px;
+      padding: 17px;
+      border: 1px solid #ffe87875;
+      border-radius: 15px;
+      background:
+        radial-gradient(circle at top right, #ffe87820, transparent 42%),
+        #071711aa;
+    }
+
+    .type {
+      color: var(--yellow);
+      font-size: 0.69rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .mission h3 {
+      margin: 8px 0;
+      font-size: 1.65rem;
+      line-height: 1.05;
+    }
+
+    .mission p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.52;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 14px 0;
+    }
+
+    .tag.field {
+      border-color: #c5a0ff90;
+      background: #c5a0ff1c;
+      color: #e9ddff;
+    }
+
+    .tag.time {
+      border-color: #ffe87890;
+      background: #ffe87818;
+      color: #fff1aa;
+    }
+
+    .safety {
+      margin-top: 13px !important;
+      padding: 10px;
+      border-left: 3px solid var(--orange);
+      background: #ff9f5514;
+      color: #ffe1c2 !important;
+      font-size: 0.82rem;
+    }
+
+    .attributes {
+      display: grid;
+      gap: 11px;
+      margin-top: 14px;
+    }
+
+    .attr {
+      display: grid;
+      grid-template-columns: 85px 1fr 30px;
+      gap: 9px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .attr strong {
+      color: var(--text);
+      text-align: right;
+    }
+
+    .camera {
+      border-color: #79bdff88;
+    }
+
+    .privacy {
+      margin-top: 13px;
+      padding: 11px;
+      border: 1px solid #79bdff77;
+      border-radius: 12px;
+      background: #79bdff12;
+      color: #d9edff;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .stage {
+      display: grid;
+      min-height: 240px;
+      max-height: 420px;
+      place-items: center;
+      overflow: hidden;
+      margin-top: 13px;
+      border: 1px solid #79bdff77;
+      border-radius: 14px;
+      background: #06130f;
+    }
+
+    .stage video {
+      display: none;
+      width: 100%;
+      max-height: 420px;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .placeholder {
+      padding: 20px;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .status {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+
+    .status.active {
+      color: var(--green);
+    }
+
+    .log {
+      grid-column: 1 / -1;
+    }
+
+    .logs {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .logitem {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px;
+      border: 1px solid #72ffaf30;
+      border-radius: 11px;
+      background: #0717119c;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .logitem strong {
+      color: var(--text);
+    }
+
+    .empty {
+      padding: 14px;
+      border-radius: 11px;
+      background: #0717119c;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .learning-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .learning-panel p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    .learning-panel .notice {
+      margin-top: 14px;
+    }
+
+    .creative-note {
+      margin-top: 16px;
+      padding: 15px;
+      border: 1px dashed #72ffaf70;
+      border-radius: 14px;
+      background: #0717116e;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
+    .creative-note h2 {
+      margin: 0 0 8px;
+      color: var(--green);
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .creative-note p {
+      margin: 8px 0;
+    }
+
+    .foot {
+      margin: 18px 4px 0;
+      color: #86aa9b;
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 780px) {
+      .head {
+        display: block;
+      }
+
+      .badge {
+        display: inline-block;
+        margin-top: 13px;
+      }
+
+      .grid,
+      .learning-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .app {
+        width: min(calc(100% - 20px), 680px);
+        padding-top: 16px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="head">
+      <div>
+        <p class="eyebrow">Z Console • Practice Archive</p>
+        <h1>Z Console</h1>
+        <p class="sub">
+          A free, local-first practice interface for movement, study, reflection,
+          deliberate practice time, and dynamic training fields.
+        </p>
+      </div>
+
+      <span class="badge">◆ PRACTICE WITH PURPOSE</span>
+    </header>
+
+    <section class="grid">
+      <section class="panel">
+        <h2>Practice Signal</h2>
+
+        <div class="console">
+          <div class="label">FICTIONAL PRACTICE SIGNAL</div>
+          <div class="power" id="powerLevel">5</div>
+          <div class="rank" id="rankText">Rank: First Step</div>
+
+          <div class="stats">
+            <div class="mini">
+              <span>XP</span>
+              <strong id="xpText">0</strong>
+            </div>
+
+            <div class="mini">
+              <span>Streak</span>
+              <strong id="streakText">0 days</strong>
+            </div>
+
+            <div class="mini">
+              <span>Sessions</span>
+              <strong id="sessionsText">0</strong>
+            </div>
+
+            <div class="mini">
+              <span>Peak Field</span>
+              <strong id="maxFieldText">Level 1</strong>
+            </div>
+
+            <div class="mini">
+              <span>Deep Modes</span>
+              <strong id="deepModeText">0</strong>
+            </div>
+
+            <div class="mini">
+              <span>Week Minutes</span>
+              <strong id="weekMinutesText">0</strong>
+            </div>
+
+            <div class="mini">
+              <span>Practice Time</span>
+              <strong id="practiceTimeText">0h 0m</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="meterbox">
+          <div class="meterrow">
+            <span>Next Rank</span>
+            <span id="rankProgressText">0 / 100 XP</span>
+          </div>
+
+          <div class="meter">
+            <div class="fill" id="rankProgressBar"></div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <label for="focus">
+            Practice focus
+            <select id="focus">
+              <option value="balanced">Integrated Practice</option>
+              <option value="strength">Strength & Carry</option>
+              <option value="stamina">Rhythm & Endurance</option>
+              <option value="agility">Balance & Response</option>
+              <option value="discipline">Study & Discipline</option>
+            </select>
+          </label>
+
+          <label for="time">
+            Available time
+            <select id="time">
+              <option value="10">10 minutes</option>
+              <option value="20">20 minutes</option>
+              <option value="30" selected>30 minutes</option>
+              <option value="45">45 minutes</option>
+            </select>
+          </label>
+
+          <label for="difficulty">
+            Challenge
+            <div class="slider">
+              <input id="difficulty" type="range" min="1" max="5" value="2">
+              <span class="pill" id="difficultyValue">2 / 5</span>
+            </div>
+          </label>
+
+          <label for="carryLoad">
+            Carry load
+            <div class="slider">
+              <input id="carryLoad" type="range" min="0" max="110" value="0">
+              <span class="pill" id="carryValue">0 lb</span>
+            </div>
+          </label>
+
+          <label for="fieldEnabled">
+            Dynamic Practice Field
+            <select id="fieldEnabled">
+              <option value="off" selected>Off — Baseline Field</option>
+              <option value="on">On — Dynamic Field Active</option>
+            </select>
+          </label>
+
+          <div id="fieldBox" hidden>
+            <label for="fieldLevel">
+              Fictional field level
+              <div class="slider">
+                <input id="fieldLevel" type="range" min="1" max="100" value="1">
+                <span class="pill" id="fieldValue">Level 1</span>
+              </div>
+            </label>
+
+            <div class="notice" id="fieldMessage">
+              Baseline Field active.
+            </div>
+          </div>
+
+          <label for="deepMode">
+            Deep Practice Mode
+            <select id="deepMode">
+              <option value="off" selected>Off — Standard Session</option>
+              <option value="focus">Focused Session — +10% XP</option>
+              <option value="immersion">Immersion Session — +20% XP</option>
+              <option value="recovery">Recovery Session — Recovery Focus</option>
+            </select>
+          </label>
+
+          <div class="notice" id="deepMessage">
+            Standard session active. Practice one mission at a time.
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button id="generateBtn" type="button">Generate Mission</button>
+          <button class="secondary" id="resetBtn" type="button">
+            Reset Local Data
+          </button>
+        </div>
+
+        <div class="attributes" id="attributes"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Current Mission</h2>
+
+        <article class="mission" id="missionCard">
+          <div class="type">Awaiting Instruction</div>
+          <h3>Open the Practice Field</h3>
+          <p>
+            Set your conditions and generate a practical, game-styled mission.
+          </p>
+          <div class="tags" id="missionTags"></div>
+          <p class="safety" id="safetyNote" hidden></p>
+        </article>
+
+        <div class="buttons">
+          <button id="completeBtn" type="button" disabled>
+            Complete Mission
+          </button>
+          <button class="secondary" id="rerollBtn" type="button" disabled>
+            Reroll
+          </button>
+        </div>
+      </section>
+
+      <section class="panel camera">
+        <h2>Training Mirror (Optional)</h2>
+
+        <p class="privacy">
+          🔒 The camera is locked by default. When enabled, it is a live preview
+          only: no microphone, no recording, no upload, no screenshots, no facial
+          recognition, and no AI movement evaluation. This is a mirror, not a
+          monitor.
+        </p>
+
+        <div class="buttons">
+          <button class="secondary" id="cameraToggle" type="button">
+            Unlock Camera
+          </button>
+        </div>
+
+        <div class="stage" id="stage">
+          <div class="placeholder" id="cameraPlaceholder">
+            The training mirror is at rest. Unlock it to use as a private
+            form-check mirror during practice.
+          </div>
+          <video id="video" autoplay playsinline muted></video>
+        </div>
+
+        <p class="status" id="cameraStatus">Camera inactive.</p>
+      </section>
+
+      <section class="panel log">
+        <h2>Training Log — This Week</h2>
+        <div class="logs" id="logs">
+          <div class="empty">
+            No sessions logged yet. Complete a mission to start your record.
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="learning-grid">
+      <article class="panel learning-panel">
+        <h2>Moral Philosophy</h2>
+
+        <p>
+          Z Console treats training as a practice of capability, self-direction,
+          responsibility, and care. The point is not intimidation or proving
+          worth. The point is to develop steadiness, useful skill, and more
+          choices in how you move through life.
+        </p>
+
+        <p>
+          Strength can support freedom when it is joined with restraint, judgment,
+          recovery, and respect for personal boundaries.
+        </p>
+
+        <div class="notice safe">
+          Capability is not aggression. Choose control over force, awareness over
+          escalation, and recovery over reckless effort.
+        </div>
+      </article>
+
+      <article class="panel learning-panel">
+        <h2>Deliberate Practice</h2>
+
+        <p>
+          Z Console records time you intentionally choose to spend practicing,
+          studying, recovering, and reflecting. Those hours are not a ranking or
+          a promise of mastery. They are a record of return.
+        </p>
+
+        <p>
+          Complete what you can honestly complete. Lower settings, shorter
+          sessions, rest, and study still count as part of a sustainable practice.
+        </p>
+
+        <div class="notice safe">
+          The record is yours. It stays in this browser and can be reset at any
+          time.
+        </div>
+      </article>
+    </section>
+
+    <section class="creative-note" aria-labelledby="creative-note-title">
+      <h2 id="creative-note-title">Creative Note</h2>
+
+      <p>
+        Z Console is a free, independent personal project about movement, study,
+        reflection, discipline, and deliberate practice.
+      </p>
+
+      <p>
+        Its creator was influenced by stories in which training represents
+        persistence, self-direction, responsibility, recovery, and the search for
+        greater capability. Dragon Ball was one work that made those themes
+        emotionally meaningful to the creator.
+      </p>
+
+      <p>
+        Z Console uses original code, writing, design, and project content. It is
+        not affiliated with, endorsed by, sponsored by, or approved by Dragon Ball,
+        Shueisha, Bird Studio, Toei Animation, or any related rights holder.
+      </p>
+    </section>
+
+    <p class="foot">
+      Z Console is a free, independent personal project for general wellness,
+      education, reflection, and deliberate practice. All XP, ranks, practice
+      signals, field levels, session effects, and progression values are fictional
+      game elements for motivation only. They are not medical, physiological,
+      fitness, or safety measurements.
+
+      <br><br>
+
+      Progress is stored locally in this browser only. The optional Training Mirror
+      is a live camera preview only: no microphone, recording, upload,
+      screenshots, facial recognition, or AI movement evaluation.
+    </p>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const KEY = "zConsoleData_v1";
+
+      const defaults = {
+        xp: 0,
+        sessions: 0,
+        streak: 0,
+        lastSessionDate: null,
+        maxFieldLevel: 1,
+        deepModeSessions: 0,
+        totalPracticeMinutes: 0,
+        attributes: {
+          strength: 5,
+          stamina: 5,
+          agility: 5,
+          discipline: 5
+        },
+        weekStart: null,
+        weekMinutes: 0,
+        logs: []
+      };
+
+      let data = load();
+      let currentMission = null;
+      let stream = null;
+
+      const $ = (id) => document.getElementById(id);
+
+      const focusEl = $("focus");
+      const timeEl = $("time");
+      const difficultyEl = $("difficulty");
+      const difficultyValue = $("difficultyValue");
+
+      const carryLoadEl = $("carryLoad");
+      const carryValue = $("carryValue");
+
+      const fieldEnabledEl = $("fieldEnabled");
+      const fieldBox = $("fieldBox");
+      const fieldLevelEl = $("fieldLevel");
+      const fieldValue = $("fieldValue");
+      const fieldMessage = $("fieldMessage");
+
+      const deepModeEl = $("deepMode");
+      const deepMessage = $("deepMessage");
+
+      const generateBtn = $("generateBtn");
+      const resetBtn = $("resetBtn");
+      const completeBtn = $("completeBtn");
+      const rerollBtn = $("rerollBtn");
+
+      const missionCard = $("missionCard");
+      const missionTags = $("missionTags");
+      const safetyNote = $("safetyNote");
+
+      const powerLevelEl = $("powerLevel");
+      const rankTextEl = $("rankText");
+      const xpTextEl = $("xpText");
+      const streakTextEl = $("streakText");
+      const sessionsTextEl = $("sessionsText");
+      const maxFieldTextEl = $("maxFieldText");
+      const deepModeTextEl = $("deepModeText");
+      const weekMinutesTextEl = $("weekMinutesText");
+      const practiceTimeTextEl = $("practiceTimeText");
+      const rankProgressText = $("rankProgressText");
+      const rankProgressBar = $("rankProgressBar");
+
+      const attributesEl = $("attributes");
+      const logsEl = $("logs");
+
+      const cameraToggle = $("cameraToggle");
+      const cameraStatus = $("cameraStatus");
+      const video = $("video");
+      const cameraPlaceholder = $("cameraPlaceholder");
+
+      const missionsByFocus = {
+        balanced: [
+          [
+            "Steady Carry",
+            "Carry a light, sturdy object across a clear space with slow, controlled steps and relaxed shoulders."
+          ],
+          [
+            "Purposeful Chores",
+            "Spend part of the session on practical household work such as tidying, sweeping, or carrying light items while maintaining comfortable posture."
+          ],
+          [
+            "Balance Check",
+            "Stand on one foot near a stable support for a comfortable interval, then switch sides and rest between rounds."
+          ]
+        ],
+
+        strength: [
+          [
+            "Carry Circuit",
+            "Carry a sturdy, manageable object across a clear space and back for several controlled rounds."
+          ],
+          [
+            "Pressing Ladder",
+            "Choose wall, incline, knee, or standard push-ups. Use a comfortable ladder pattern with full rest between sets."
+          ],
+          [
+            "Wall Sit Practice",
+            "Hold a shallow wall sit only as long as comfortable. Rest fully, then repeat for up to three attempts."
+          ]
+        ],
+
+        stamina: [
+          [
+            "Steady Route",
+            "Walk briskly or march in place for the session at a pace you can maintain without rushing."
+          ],
+          [
+            "Rhythm Circuit",
+            "Alternate one minute of comfortable marching with one minute of recovery for the available session time."
+          ],
+          [
+            "Breath and Pace",
+            "Walk at a manageable pace while using relaxed, steady breathing. Slow down whenever breathing becomes strained."
+          ]
+        ],
+
+        agility: [
+          [
+            "Lateral Response",
+            "Take short, controlled steps side to side in a clear space. Rest between bursts and keep your movements stable."
+          ],
+          [
+            "Soft Catch",
+            "Toss and catch a soft object at a comfortable height. Increase attention before increasing speed."
+          ],
+          [
+            "Balance Flow",
+            "Move slowly between supported balance positions, switching sides and keeping a stable surface nearby."
+          ]
+        ],
+
+        discipline: [
+          [
+            "Study Block",
+            "Spend the session reading, reviewing, or practicing a skill with a tall, comfortable seated posture."
+          ],
+          [
+            "Quiet Focus",
+            "Sit or stand comfortably in stillness. Use slow breathing and return your attention whenever it wanders."
+          ],
+          [
+            "Field Notes",
+            "Write a short reflection on today's practice, what felt workable, and one thing you want to notice next time."
+          ]
+        ]
+      };
+
+      const rankThresholds = [
+        [0, "First Step"],
+        [100, "Pathfinder"],
+        [250, "Steady Practitioner"],
+        [500, "Field Student"],
+        [900, "Practice Keeper"],
+        [1500, "Quiet Mastery"]
+      ];
+
+      function cloneDefaults() {
+        return JSON.parse(JSON.stringify(defaults));
+      }
+
+      function load() {
+        try {
+          const raw = localStorage.getItem(KEY);
+
+          if (!raw) {
+            return cloneDefaults();
+          }
+
+          const saved = JSON.parse(raw);
+          const base = cloneDefaults();
+
+          return {
+            ...base,
+            ...saved,
+            attributes: {
+              ...base.attributes,
+              ...(saved.attributes || {})
+            },
+            logs: Array.isArray(saved.logs) ? saved.logs : []
+          };
+        } catch (error) {
+          return cloneDefaults();
+        }
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(data));
+        } catch (error) {
+          /* The interface remains usable if browser storage is unavailable. */
+        }
+      }
+
+      function isoWeekStart(date) {
+        const value = new Date(date);
+        const day = (value.getDay() + 6) % 7;
+
+        value.setDate(value.getDate() - day);
+        value.setHours(0, 0, 0, 0);
+
+        return value.toISOString();
+      }
+
+      function ensureWeek() {
+        const currentWeekStart = isoWeekStart(new Date());
+
+        if (data.weekStart !== currentWeekStart) {
+          data.weekStart = currentWeekStart;
+          data.weekMinutes = 0;
+        }
+      }
+
+      function formatPracticeTime(totalMinutes) {
+        const minutes = Math.max(0, Number(totalMinutes) || 0);
+        const hours = Math.floor(minutes / 60);
+        const remainder = minutes % 60;
+
+        return `${hours}h ${remainder}m`;
+      }
+
+      function currentRank(xp) {
+        let current = rankThresholds[0];
+        let next = null;
+
+        for (let index = 0; index < rankThresholds.length; index += 1) {
+          if (xp >= rankThresholds[index][0]) {
+            current = rankThresholds[index];
+          } else {
+            next = rankThresholds[index];
+            break;
+          }
+        }
+
+        return {
+          name: current[1],
+          floor: current[0],
+          next
+        };
+      }
+
+      function refreshUI() {
+        ensureWeek();
+
+        const rank = currentRank(data.xp);
+
+        powerLevelEl.textContent = Math.round(5 + data.xp * 1.3);
+        rankTextEl.textContent = `Rank: ${rank.name}`;
+
+        xpTextEl.textContent = data.xp;
+        streakTextEl.textContent =
+          `${data.streak} day${data.streak === 1 ? "" : "s"}`;
+
+        sessionsTextEl.textContent = data.sessions;
+        maxFieldTextEl.textContent = `Level ${data.maxFieldLevel}`;
+        deepModeTextEl.textContent = data.deepModeSessions;
+        weekMinutesTextEl.textContent = data.weekMinutes;
+        practiceTimeTextEl.textContent =
+          formatPracticeTime(data.totalPracticeMinutes);
+
+        if (rank.next) {
+          const span = rank.next[0] - rank.floor;
+          const into = data.xp - rank.floor;
+
+          rankProgressText.textContent = `${into} / ${span} XP`;
+          rankProgressBar.style.width =
+            `${Math.min(100, (into / span) * 100)}%`;
+        } else {
+          rankProgressText.textContent = "Highest rank reached";
+          rankProgressBar.style.width = "100%";
+        }
+
+        attributesEl.innerHTML = "";
+
+        Object.entries(data.attributes).forEach(([key, value]) => {
+          const row = document.createElement("div");
+          const label = document.createElement("span");
+          const meter = document.createElement("div");
+          const fill = document.createElement("div");
+          const number = document.createElement("strong");
+
+          row.className = "attr";
+          label.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+
+          meter.className = "meter";
+          fill.className = "fill";
+          fill.style.width = `${Math.min(100, value)}%`;
+
+          number.textContent = value;
+
+          meter.appendChild(fill);
+          row.appendChild(label);
+          row.appendChild(meter);
+          row.appendChild(number);
+
+          attributesEl.appendChild(row);
+        });
+
+        if (data.logs.length === 0) {
+          logsEl.innerHTML = "";
+
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent =
+            "No sessions logged yet. Complete a mission to start your record.";
+
+          logsEl.appendChild(empty);
+        } else {
+          logsEl.innerHTML = "";
+
+          data.logs.slice(0, 10).forEach((log) => {
+            const row = document.createElement("div");
+            const left = document.createElement("span");
+            const title = document.createElement("strong");
+            const spacer = document.createElement("br");
+            const meta = document.createTextNode(log.meta);
+            const right = document.createElement("span");
+
+            row.className = "logitem";
+
+            title.textContent = log.title;
+            left.appendChild(title);
+            left.appendChild(spacer);
+            left.appendChild(meta);
+
+            right.textContent = `+${log.xp} XP`;
+
+            row.appendChild(left);
+            row.appendChild(right);
+
+            logsEl.appendChild(row);
+          });
+        }
+
+        save();
+      }
+
+      function updateFieldMessage() {
+        const level = parseInt(fieldLevelEl.value, 10);
+
+        fieldValue.textContent = `Level ${level}`;
+
+        fieldMessage.className =
+          `notice${level >= 50 ? " danger" : level >= 20 ? " safe" : ""}`;
+
+        let message = `Dynamic Field set to Level ${level}. `;
+
+        if (level >= 80) {
+          message +=
+            "High fictional pressure mode. Keep real movement controlled, comfortable, and appropriate for your environment.";
+        } else if (level >= 20) {
+          message +=
+            "Elevated fictional challenge. Immersion Session cannot be combined above Level 20.";
+        } else {
+          message +=
+            "A moderate fictional field for steady, deliberate practice.";
+        }
+
+        fieldMessage.textContent = message;
+      }
+
+      function updateDeepMessage() {
+        const messages = {
+          off:
+            "Standard session active. Practice one mission at a time.",
+          focus:
+            "Focused Session: +10% fictional XP. Use it for deliberate attention, not extra strain.",
+          immersion:
+            "Immersion Session: +20% fictional XP. Use a controlled pace and do not combine it with elevated field levels.",
+          recovery:
+            "Recovery Session: a lower-demand mission that supports rest, reflection, and return."
+        };
+
+        deepMessage.textContent = messages[deepModeEl.value];
+      }
+
+      function pickMission() {
+        const pool = missionsByFocus[focusEl.value];
+        const mission = pool[Math.floor(Math.random() * pool.length)];
+
+        return {
+          title: mission[0],
+          description: mission[1]
+        };
+      }
+
+      function stackViolation() {
+        const fieldEnabled = fieldEnabledEl.value === "on";
+        const level = parseInt(fieldLevelEl.value, 10);
+        const deepMode = deepModeEl.value;
+        const difficulty = parseInt(difficultyEl.value, 10);
+
+        if (
+          fieldEnabled &&
+          level > 20 &&
+          deepMode === "immersion" &&
+          difficulty === 5
+        ) {
+          return (
+            "Blocked: maximum Challenge cannot stack with Immersion Session above Field Level 20. Lower one setting to continue."
+          );
+        }
+
+        if (
+          fieldEnabled &&
+          level > 20 &&
+          deepMode !== "off" &&
+          deepMode !== "recovery"
+        ) {
+          return (
+            "Blocked: Deep Practice modes cannot stack with a Dynamic Field above Level 20. Turn one setting off or choose Recovery Session."
+          );
+        }
+
+        return null;
+      }
+
+      function addTag(text, className) {
+        const tag = document.createElement("span");
+        tag.className = `tag ${className}`;
+        tag.textContent = text;
+        missionTags.appendChild(tag);
+      }
+
+      function generateMission() {
+        const violation = stackViolation();
+
+        if (violation) {
+          currentMission = null;
+
+          missionCard.querySelector(".type").textContent = "Blocked";
+          missionCard.querySelector("h3").textContent = "Settings Conflict";
+          missionCard.querySelector("p").textContent = violation;
+
+          missionTags.innerHTML = "";
+          safetyNote.hidden = true;
+          completeBtn.disabled = true;
+          rerollBtn.disabled = true;
+
+          return;
+        }
+
+        const mission = pickMission();
+
+        currentMission = mission;
+
+        missionCard.querySelector(".type").textContent =
+          `${focusEl.value.toUpperCase()} MISSION`;
+
+        missionCard.querySelector("h3").textContent = mission.title;
+        missionCard.querySelector("p").textContent = mission.description;
+
+        missionTags.innerHTML = "";
+
+        addTag(`${timeEl.value} min`, "time");
+
+        if (fieldEnabledEl.value === "on") {
+          addTag(`Field Level ${fieldLevelEl.value}`, "field");
+        }
+
+        if (deepModeEl.value !== "off") {
+          addTag(
+            deepModeEl.options[deepModeEl.selectedIndex].text,
+            "time"
+          );
+        }
+
+        if (parseInt(carryLoadEl.value, 10) > 0) {
+          addTag(`${carryLoadEl.value} lb carry`, "field");
+        }
+
+        safetyNote.hidden = false;
+        safetyNote.textContent =
+          "Reminder: Field levels and Deep Practice modes are fictional game elements. Train at a real, comfortable intensity for your body. Stop if anything hurts, feels dizzying, unstable, or unsafe.";
+
+        completeBtn.disabled = false;
+        rerollBtn.disabled = false;
+      }
+
+      function updateStreak() {
+        const today = new Date().toDateString();
+
+        if (data.lastSessionDate === today) {
+          return;
+        }
+
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+        data.streak =
+          data.lastSessionDate === yesterday
+            ? data.streak + 1
+            : 1;
+
+        data.lastSessionDate = today;
+      }
+
+      function completeMission() {
+        if (!currentMission) {
+          return;
+        }
+
+        const minutes = parseInt(timeEl.value, 10);
+        const difficulty = parseInt(difficultyEl.value, 10);
+        const fieldEnabled = fieldEnabledEl.value === "on";
+        const fieldLevel = fieldEnabled
+          ? parseInt(fieldLevelEl.value, 10)
+          : 1;
+
+        const deepMode = deepModeEl.value;
+
+        let xpGain = minutes * difficulty * 1.5;
+
+        if (fieldEnabled) {
+          xpGain *= 1 + fieldLevel / 100;
+        }
+
+        if (deepMode === "focus") {
+          xpGain *= 1.1;
+        }
+
+        if (deepMode === "immersion") {
+          xpGain *= 1.2;
+        }
+
+        if (deepMode === "recovery") {
+          xpGain = Math.round(xpGain * 0.3);
+        }
+
+        xpGain = Math.round(xpGain);
+
+        data.xp += xpGain;
+        data.sessions += 1;
+        data.weekMinutes += minutes;
+        data.totalPracticeMinutes += minutes;
+
+        if (fieldEnabled) {
+          data.maxFieldLevel = Math.max(
+            data.maxFieldLevel,
+            fieldLevel
+          );
+        }
+
+        if (deepMode !== "off") {
+          data.deepModeSessions += 1;
+        }
+
+        const attributeTargets = {
+          balanced: ["strength", "agility"],
+          strength: ["strength"],
+          stamina: ["stamina"],
+          agility: ["agility"],
+          discipline: ["discipline"]
+        };
+
+        attributeTargets[focusEl.value].forEach((attribute) => {
+          data.attributes[attribute] = Math.min(
+            999,
+            data.attributes[attribute] + Math.round(difficulty * 0.6)
+          );
+        });
+
+        updateStreak();
+
+        const metadata = [
+          `${minutes} min`,
+          `challenge ${difficulty}`
+        ];
+
+        if (fieldEnabled) {
+          metadata.push(`field ${fieldLevel}`);
+        }
+
+        if (deepMode !== "off") {
+          metadata.push(deepMode);
+        }
+
+        if (parseInt(carryLoadEl.value, 10) > 0) {
+          metadata.push(`${carryLoadEl.value} lb carry`);
+        }
+
+        data.logs.unshift({
+          title: currentMission.title,
+          meta: metadata.join(" • "),
+          xp: xpGain
+        });
+
+        data.logs = data.logs.slice(0, 30);
+
+        completeBtn.disabled = true;
+        rerollBtn.disabled = true;
+
+        missionCard.querySelector(".type").textContent =
+          "Mission Complete";
+
+        missionCard.querySelector("h3").textContent =
+          currentMission.title;
+
+        missionCard.querySelector("p").textContent =
+          `Logged +${xpGain} XP and ${minutes} minutes of deliberate practice. Generate a new mission when you are ready.`;
+
+        currentMission = null;
+
+        refreshUI();
+      }
+
+      function resetLocalData() {
+        const approved = window.confirm(
+          "Reset all Z Console progress saved in this browser? This cannot be undone."
+        );
+
+        if (!approved) {
+          return;
+        }
+
+        data = cloneDefaults();
+        ensureWeek();
+
+        currentMission = null;
+
+        missionCard.querySelector(".type").textContent =
+          "Awaiting Instruction";
+
+        missionCard.querySelector("h3").textContent =
+          "Open the Practice Field";
+
+        missionCard.querySelector("p").textContent =
+          "Set your conditions and generate a practical, game-styled mission.";
+
+        missionTags.innerHTML = "";
+        safetyNote.hidden = true;
+
+        completeBtn.disabled = true;
+        rerollBtn.disabled = true;
+
+        refreshUI();
+      }
+
+      function stopCamera() {
+        if (!stream) {
+          return;
+        }
+
+        stream.getTracks().forEach((track) => track.stop());
+
+        stream = null;
+        video.srcObject = null;
+
+        video.style.display = "none";
+        cameraPlaceholder.style.display = "grid";
+
+        cameraStatus.textContent = "Camera inactive.";
+        cameraStatus.className = "status";
+
+        cameraToggle.textContent = "Unlock Camera";
+      }
+
+      async function toggleCamera() {
+        if (stream) {
+          stopCamera();
+          return;
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          cameraStatus.textContent =
+            "Camera access requires a supported browser and a secure page, such as HTTPS or localhost.";
+          cameraStatus.className = "status";
+          return;
+        }
+
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: "user"
+            },
+            audio: false
+          });
+
+          video.srcObject = stream;
+          video.style.display = "block";
+
+          cameraPlaceholder.style.display = "none";
+
+          cameraStatus.textContent =
+            "Camera active — live preview only. Nothing is recorded, uploaded, or analyzed.";
+
+          cameraStatus.className = "status active";
+          cameraToggle.textContent = "Lock Camera";
+        } catch (error) {
+          cameraStatus.textContent =
+            "Camera permission was declined or the camera is unavailable.";
+
+          cameraStatus.className = "status";
+        }
+      }
+
+      difficultyEl.addEventListener("input", () => {
+        difficultyValue.textContent = `${difficultyEl.value} / 5`;
+      });
+
+      carryLoadEl.addEventListener("input", () => {
+        carryValue.textContent = `${carryLoadEl.value} lb`;
+      });
+
+      fieldEnabledEl.addEventListener("change", () => {
+        const enabled = fieldEnabledEl.value === "on";
+
+        fieldBox.hidden = !enabled;
+
+        if (enabled) {
+          carryLoadEl.value = 0;
+          carryValue.textContent = "0 lb";
+
+          updateFieldMessage();
+        }
+      });
+
+      fieldLevelEl.addEventListener("input", updateFieldMessage);
+
+      deepModeEl.addEventListener("change", updateDeepMessage);
+
+      generateBtn.addEventListener("click", generateMission);
+
+      rerollBtn.addEventListener("click", generateMission);
+
+      completeBtn.addEventListener("click", completeMission);
+
+      resetBtn.addEventListener("click", resetLocalData);
+
+      cameraToggle.addEventListener("click", toggleCamera);
+
+      window.addEventListener("pagehide", stopCamera);
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          stopCamera();
+        }
+      });
+
+      ensureWeek();
+      updateFieldMessage();
+      updateDeepMessage();
+      refreshUI();
+    })();
+  </script>
+</body>
+</html>

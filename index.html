@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Turtle School Training Console</title>
+  <style>
+    :root {
+      --bg: #07100f;
+      --panel: #10221f;
+      --panel-2: #15352d;
+      --line: #2b6f59;
+      --green: #66ffae;
+      --lime: #c7ff63;
+      --yellow: #ffe56b;
+      --orange: #ff9f4b;
+      --red: #ff5d62;
+      --text: #e7fff2;
+      --muted: #a4c5b2;
+      --shadow: 0 0 22px rgba(102, 255, 174, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(43, 111, 89, 0.35), transparent 32%),
+        linear-gradient(145deg, #050a09, #0a1b17 55%, #050a09);
+    }
+
+    button,
+    select,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .header {
+      display: flex;
+      gap: 18px;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--lime);
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.9rem, 5vw, 3.25rem);
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .header-badge {
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--lime);
+      background: rgba(16, 34, 31, 0.8);
+      white-space: nowrap;
+      box-shadow: var(--shadow);
+      font-weight: 800;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      background: linear-gradient(180deg, rgba(20, 53, 45, 0.94), rgba(10, 27, 23, 0.92));
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .scouter-screen {
+      margin-top: 16px;
+      padding: 18px;
+      border: 1px solid rgba(102, 255, 174, 0.7);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(102, 255, 174, 0.06) 0,
+          rgba(102, 255, 174, 0.06) 1px,
+          transparent 1px,
+          transparent 4px
+        ),
+        #07130f;
+    }
+
+    .scouter-screen::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(102, 255, 174, 0.15) 50%,
+        transparent 100%
+      );
+      transform: translateX(-100%);
+      animation: scan 3.5s infinite linear;
+    }
+
+    @keyframes scan {
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+    .power-label {
+      color: var(--lime);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+    }
+
+    .power-number {
+      margin: 3px 0 0;
+      color: var(--green);
+      font-family: "Courier New", monospace;
+      font-size: clamp(3rem, 9vw, 6.7rem);
+      font-weight: 900;
+      letter-spacing: -0.07em;
+      text-shadow: 0 0 16px rgba(102, 255, 174, 0.5);
+    }
+
+    .rank {
+      margin: 5px 0 0;
+      color: var(--yellow);
+      font-weight: 800;
+    }
+
+    .scouter-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .mini-card {
+      border: 1px solid rgba(102, 255, 174, 0.26);
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(102, 255, 174, 0.05);
+    }
+
+    .mini-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--text);
+      font-size: 1.2rem;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    select,
+    input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px;
+      outline: none;
+      color: var(--text);
+      background: #0a1814;
+    }
+
+    input[type="range"] {
+      accent-color: var(--lime);
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .value-pill {
+      min-width: 70px;
+      text-align: center;
+      padding: 7px 9px;
+      border-radius: 999px;
+      color: var(--lime);
+      background: #07130f;
+      border: 1px solid var(--line);
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #06100b;
+      background: var(--lime);
+      font-weight: 900;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+    }
+
+    button.secondary {
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: rgba(102, 255, 174, 0.06);
+    }
+
+    .mission-card {
+      margin-top: 16px;
+      padding: 18px;
+      min-height: 250px;
+      border: 1px solid rgba(255, 229, 107, 0.42);
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at top right, rgba(255, 229, 107, 0.12), transparent 40%),
+        rgba(7, 19, 15, 0.72);
+    }
+
+    .mission-type {
+      color: var(--yellow);
+      font-size: 0.76rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .mission-card h3 {
+      margin: 8px 0;
+      font-size: clamp(1.45rem, 3vw, 2.05rem);
+    }
+
+    .mission-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .mission-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .tag {
+      padding: 7px 10px;
+      border: 1px solid rgba(102, 255, 174, 0.28);
+      border-radius: 999px;
+      color: var(--green);
+      font-size: 0.8rem;
+      font-weight: 800;
+      background: rgba(102, 255, 174, 0.06);
+    }
+
+    .safety-note {
+      margin-top: 14px !important;
+      padding: 10px 12px;
+      border-left: 3px solid var(--orange);
+      color: #ffe0bf !important;
+      font-size: 0.84rem;
+      background: rgba(255, 159, 75, 0.08);
+    }
+
+    .progress-wrap {
+      margin-top: 16px;
+    }
+
+    .progress-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .bar {
+      height: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #07130f;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      transition: width 0.45s ease;
+      background: linear-gradient(90deg, var(--green), var(--lime), var(--yellow));
+      box-shadow: 0 0 12px rgba(199, 255, 99, 0.48);
+    }
+
+    .stat-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 17px;
+    }
+
+    .stat-item {
+      display: grid;
+      grid-template-columns: 100px 1fr 36px;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.83rem;
+      font-weight: 800;
+    }
+
+    .stat-item .bar {
+      height: 10px;
+    }
+
+    .stat-item .fill {
+      background: linear-gradient(90deg, var(--orange), var(--yellow), var(--lime));
+    }
+
+    .stat-item strong {
+      color: var(--text);
+      text-align: right;
+    }
+
+    .log {
+      grid-column: 1 / -1;
+    }
+
+    .log-list {
+      display: grid;
+      gap: 10px;
+      margin: 16px 0 0;
+    }
+
+    .log-entry {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid rgba(102, 255, 174, 0.18);
+      border-radius: 11px;
+      color: var(--muted);
+      background: rgba(7, 19, 15, 0.58);
+    }
+
+    .log-entry strong {
+      color: var(--text);
+    }
+
+    .empty {
+      padding: 14px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-align: center;
+      background: rgba(7, 19, 15, 0.5);
+    }
+
+    .footer-note {
+      margin: 22px 4px 0;
+      color: #7ea58e;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 850px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        display: block;
+      }
+
+      .header-badge {
+        display: inline-block;
+        margin-top: 14px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .app {
+        width: min(100% - 20px, 1180px);
+      }
+
+      .panel {
+        padding: 15px;
+      }
+
+      .scouter-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-item {
+        grid-template-columns: 84px 1fr 32px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="header">
+      <div>
+        <p class="eyebrow">Kame House • Turtle School Console</p>
+        <h1>Master Roshi Training Tool</h1>
+        <p class="subtitle">
+          Train your strength, stamina, balance, reflexes, discipline, and work capacity.
+          Complete missions, build a streak, and watch your scouter reading rise.
+        </p>
+      </div>
+      <div class="header-badge">🐢 TRAIN HARD · REST SMART</div>
+    </header>
+
+    <section class="dashboard">
+      <section class="panel">
+        <h2>Scouter Reading</h2>
+
+        <div class="scouter-screen">
+          <div class="power-label">ESTIMATED TURTLE SCHOOL POWER LEVEL</div>
+          <div class="power-number" id="powerLevel">5</div>
+          <div class="rank" id="rankText">Rank: Beginner Turtle</div>
+
+          <div class="scouter-stats">
+            <div class="mini-card">
+              <span>Total XP</span>
+              <strong id="xpText">0</strong>
+            </div>
+            <div class="mini-card">
+              <span>Streak</span>
+              <strong id="streakText">0 days</strong>
+            </div>
+            <div class="mini-card">
+              <span>Sessions</span>
+              <strong id="sessionsText">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-line">
+            <span>Next rank progress</span>
+            <span id="rankProgressText">0 / 100 XP</span>
+          </div>
+          <div class="bar">
+            <div class="fill" id="rankProgressBar"></div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <label>
+            Training focus
+            <select id="focus">
+              <option value="balanced">Balanced Turtle School</option>
+              <option value="strength">Strength & Carry Power</option>
+              <option value="stamina">Stamina & Endurance</option>
+              <option value="agility">Speed, Balance & Reflexes</option>
+              <option value="discipline">Study & Discipline</option>
+            </select>
+          </label>
+
+          <label>
+            Available training time
+            <select id="time">
+              <option value="20">20 minutes</option>
+              <option value="30" selected>30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </label>
+
+          <label>
+            Difficulty
+            <div class="slider-row">
+              <input id="difficulty" type="range" min="1" max="5" value="2" />
+              <span class="value-pill" id="difficultyValue">2 / 5</span>
+            </div>
+          </label>
+
+          <label>
+            Turtle shell load
+            <div class="slider-row">
+              <input id="shellLoad" type="range" min="0" max="20" value="0" step="1" />
+              <span class="value-pill" id="shellValue">0 lb</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="button-row">
+          <button id="generateBtn">Generate Roshi Mission</button>
+          <button class="secondary" id="resetBtn">Reset Training Data</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Current Mission</h2>
+
+        <article class="mission-card" id="missionCard">
+          <div class="mission-type">Awaiting instruction</div>
+          <h3>Speak to Master Roshi</h3>
+          <p>
+            Configure your training conditions, then generate a mission. The goal is not
+            to become reckless—it is to become more capable every day.
+          </p>
+        </article>
+
+        <div class="button-row">
+          <button id="completeBtn" disabled>Complete Mission</button>
+          <button class="secondary" id="rerollBtn" disabled>Reroll Mission</button>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-line">
+            <span>Today's training completion</span>
+            <span id="dailyProgressText">0%</span>
+          </div>
+          <div class="bar">
+            <div class="fill" id="dailyProgressBar"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Turtle School Attributes</h2>
+
+        <div class="stat-list">
+          <div class="stat-item">
+            <span>Strength</span>
+            <div class="bar"><div class="fill" id="strengthBar"></div></div>
+            <strong id="strengthText">1</strong>
+          </div>
+
+          <div class="stat-item">
+            <span>Stamina</span>
+            <div class="bar"><div class="fill" id="staminaBar"></div></div>
+            <strong id="staminaText">1</strong>
+          </div>
+
+          <div class="stat-item">
+            <span>Agility</span>
+            <div class="bar"><div class="fill" id="agilityBar"></div></div>
+            <strong id="agilityText">1</strong>
+          </div>
+
+          <div class="stat-item">
+            <span>Balance</span>
+            <div class="bar"><div class="fill" id="balanceBar"></div></div>
+            <strong id="balanceText">1</strong>
+          </div>
+
+          <div class="stat-item">
+            <span>Discipline</span>
+            <div class="bar"><div class="fill" id="disciplineBar"></div></div>
+            <strong id="disciplineText">1</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Roshi's Rule</h2>
+        <div class="mission-card">
+          <div class="mission-type">Training philosophy</div>
+          <h3>“Work well, study well, play well, eat well, and rest well.”</h3>
+          <p>
+            The best Turtle School program blends physical preparation with recovery,
+            attention, and consistency. Your scouter number is a game metric—not a
+            medical or athletic assessment.
+          </p>
+          <p class="safety-note">
+            Safety: Keep loaded carries and weighted work controlled. Do not wear a
+            backpack or weighted “shell” for sprinting, jumping, swimming, climbing,
+            or unstable balance drills. Stop for pain, dizziness, chest pain, or unusual
+            shortness of breath.
+          </p>
+        </div>
+      </section>
+
+      <section class="panel log">
+        <h2>Training Log</h2>
+        <div class="log-list" id="logList">
+          <div class="empty">No completed missions yet. Your Turtle School journey starts now.</div>
+        </div>
+      </section>
+    </section>
+
+    <p class="footer-note">
+      Fan-made training interface. Adjust exercises to your experience, equipment, and
+      health status. If you are new to exercise or have an injury or health condition,
+      use a qualified coach or clinician for personalized guidance.
+    </p>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "turtleSchoolTrainingDataV1";
+
+    const defaultData = {
+      xp: 0,
+      sessions: 0,
+      streak: 0,
+      lastCompletionDate: null,
+      stats: {
+        strength: 1,
+        stamina: 1,
+        agility: 1,
+        balance: 1,
+        discipline: 1
+      },
+      log: [],
+      completedToday: 0
+    };
+
+    let data = loadData();
+    let currentMission = null;
+
+    const missionTemplates = [
+      {
+        id: "milk",
+        category: "Milk Delivery Run",
+        focuses: ["balanced", "stamina", "strength"],
+        title: "Milk Run Across the Island",
+        description:
+          "Turn the classic milk delivery into a controlled loaded-carry and endurance session. Carry manageable objects with clean posture, walk with purpose, and keep your breathing steady.",
+        stats: { strength: 2, stamina: 3, balance: 1 },
+        safety:
+          "Use grocery bags, dumbbells, kettlebells, or a backpack only for walking. Avoid running with added load."
+      },
+      {
+        id: "plow",
+        category: "Fieldwork",
+        focuses: ["balanced", "strength", "discipline"],
+        title: "Bare-Hand Fieldwork Circuit",
+        description:
+          "Build total-body work capacity with squat, hinge, push, pull, and core movements. Move smoothly instead of chasing sloppy speed.",
+        stats: { strength: 3, stamina: 2, discipline: 2 },
+        safety:
+          "Choose regressions you can control. For example, incline push-ups are valid Turtle School push-ups."
+      },
+      {
+        id: "construction",
+        category: "Construction Training",
+        focuses: ["strength", "balanced"],
+        title: "Kame House Construction Shift",
+        description:
+          "Practice functional strength: carries, controlled hinges, step-ups, and bracing. Imagine rebuilding the pier one safe rep at a time.",
+        stats: { strength: 3, stamina: 2, balance: 1 },
+        safety:
+          "Lift only objects you can control. Keep your spine neutral and avoid awkward twisting under load."
+      },
+      {
+        id: "swim",
+        category: "Lake Endurance",
+        focuses: ["stamina", "balanced"],
+        title: "Ten-Lap Lake Challenge",
+        description:
+          "Use swimming if you have supervised pool access; otherwise choose a low-impact cardio substitute such as cycling, brisk walking, or an easy jog.",
+        stats: { stamina: 4, discipline: 1 },
+        safety:
+          "Never swim alone or in unsafe water. If swimming is unavailable, select the listed dry-land substitute."
+      },
+      {
+        id: "balance",
+        category: "Log Bridge Balance",
+        focuses: ["agility", "balanced"],
+        title: "Narrow-Path Balance Trial",
+        description:
+          "Develop foot control, posture, and focus with low-height balance drills. Basketball players can treat this as a single-leg-control session.",
+        stats: { balance: 4, agility: 2, discipline: 1 },
+        safety:
+          "Use a line on the floor, low beam, or taped path—not a high log, rail, or ledge."
+      },
+      {
+        id: "bees",
+        category: "Reflex Training",
+        focuses: ["agility", "balanced"],
+        title: "Bee Dodge Reflex Drill",
+        description:
+          "No actual bees required. Use reaction cues, cone cuts, quick-feet patterns, or a partner calling directions to sharpen perception and movement.",
+        stats: { agility: 4, balance: 1, stamina: 1 },
+        safety:
+          "Keep changes of direction inside your ability. Use a flat, clear area and wear stable footwear."
+      },
+      {
+        id: "study",
+        category: "Study Session",
+        focuses: ["discipline", "balanced"],
+        title: "Turtle School Study Hour",
+        description:
+          "Train the mind: review training technique, mobility, nutrition basics, film study, a new language, or any focused skill without distractions.",
+        stats: { discipline: 4, balance: 1 },
+        safety:
+          "Use this mission as an active recovery option when fatigue is high."
+      },
+      {
+        id: "recovery",
+        category: "Recovery Discipline",
+        focuses: ["discipline", "stamina", "balanced"],
+        title: "Rest Like a Turtle Master",
+        description:
+          "A strategic recovery day: easy walking, mobility, light stretching, hydration, and a short reflection on what your body needs next.",
+        stats: { discipline: 3, balance: 2, stamina: 1 },
+        safety:
+          "Recovery is training. Keep intensity easy enough that you finish feeling better than you started."
+      }
+    ];
+
+    const focusNames = {
+      balanced: "Balanced Turtle School",
+      strength: "Strength & Carry Power",
+      stamina: "Stamina & Endurance",
+      agility: "Speed, Balance & Reflexes",
+      discipline: "Study & Discipline"
+    };
+
+    function loadData() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return saved
+          ? {
+              ...defaultData,
+              ...saved,
+              stats: { ...defaultData.stats, ...(saved.stats || {}) }
+            }
+          : structuredClone(defaultData);
+      } catch {
+        return structuredClone(defaultData);
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function todayString() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function getRank(powerLevel) {
+      if (powerLevel < 20) return "Beginner Turtle";
+      if (powerLevel < 45) return "Milk Runner";
+      if (powerLevel < 80) return "Island Worker";
+      if (powerLevel < 125) return "Turtle School Disciple";
+      if (powerLevel < 180) return "Kame House Veteran";
+      if (powerLevel < 250) return "Tournament Contender";
+      return "Roshi's Elite Student";
+    }
+
+    function getPowerLevel() {
+      const statTotal = Object.values(data.stats).reduce((sum, value) => sum + value, 0);
+      return 5 + Math.floor(data.xp / 4) + statTotal * 2 + data.streak * 2;
+    }
+
+    function getRankTarget() {
+      const thresholds = [100, 250, 500, 850, 1300, 1900, 2700];
+      const xp = data.xp;
+      const next = thresholds.find((threshold) => threshold > xp) || xp + 1000;
+      const previous = [...thresholds].reverse().find((threshold) => threshold <= xp) || 0;
+      return { previous, next };
+    }
+
+    function updateShellValue() {
+      document.getElementById("shellValue").textContent =
+        `${document.getElementById("shellLoad").value} lb`;
+    }
+
+    function updateDifficultyValue() {
+      document.getElementById("difficultyValue").textContent =
+        `${document.getElementById("difficulty").value} / 5`;
+    }
+
+    function render() {
+      const power = getPowerLevel();
+      const rankInfo = getRankTarget();
+      const rankProgress = ((data.xp - rankInfo.previous) / (rankInfo.next - rankInfo.previous)) * 100;
+      const dailyProgress = Math.min(data.completedToday * 50, 100);
+
+      document.getElementById("powerLevel").textContent = power.toLocaleString();
+      document.getElementById("rankText").textContent = `Rank: ${getRank(power)}`;
+      document.getElementById("xpText").textContent = data.xp.toLocaleString();
+      document.getElementById("streakText").textContent = `${data.streak} day${data.streak === 1 ? "" : "s"}`;
+      document.getElementById("sessionsText").textContent = data.sessions;
+      document.getElementById("rankProgressText").textContent =
+        `${data.xp - rankInfo.previous} / ${rankInfo.next - rankInfo.previous} XP`;
+      document.getElementById("rankProgressBar").style.width = `${Math.max(0, rankProgress)}%`;
+      document.getElementById("dailyProgressText").textContent = `${dailyProgress}%`;
+      document.getElementById("dailyProgressBar").style.width = `${dailyProgress}%`;
+
+      Object.entries(data.stats).forEach(([stat, value]) => {
+        document.getElementById(`${stat}Text`).textContent = value;
+        document.getElementById(`${stat}Bar`).style.width = `${Math.min(value * 5, 100)}%`;
+      });
+
+      renderLog();
+      saveData();
+    }
+
+    function renderLog() {
+      const logList = document.getElementById("logList");
+
+      if (!data.log.length) {
+        logList.innerHTML =
+          `<div class="empty">No completed missions yet. Your Turtle School journey starts now.</div>`;
+        return;
+      }
+
+      logList.innerHTML = data.log
+        .slice(0, 6)
+        .map(
+          (entry) => `
+            <div class="log-entry">
+              <div>
+                <strong>${entry.title}</strong><br />
+                <small>${entry.date} · ${entry.duration} min · Difficulty ${entry.difficulty}/5</small>
+              </div>
+              <strong>+${entry.xp} XP</strong>
+            </div>
+          `
+        )
+        .join("");
+    }
+
+    function randomItem(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function chooseMission(focus) {
+      const matching = missionTemplates.filter((mission) =>
+        mission.focuses.includes(focus)
+      );
+
+      return randomItem(matching.length ? matching : missionTemplates);
+    }
+
+    function missionWorkout(mission, duration, difficulty, shellLoad) {
+      const multiplier = 1 + (difficulty - 1) * 0.2;
+      const rounds = difficulty <= 2 ? 2 : difficulty <= 4 ? 3 : 4;
+      const workTime = Math.max(10, Math.round(duration * 0.65));
+      const shellText = shellLoad > 0 ? ` with up to ${shellLoad} lb for controlled walking/carries` : "";
+
+      const workouts = {
+        milk: `Warm up 4 minutes. Then complete ${rounds} rounds: ${Math.round(3 * multiplier)} minutes brisk walking${shellText}, ${Math.round(10 * multiplier)} bodyweight squats, and ${Math.round(20 * multiplier)} seconds of suitcase carry per side. Finish with easy breathing for 2 minutes.`,
+        plow: `Warm up 4 minutes. Complete ${rounds} controlled rounds: ${Math.round(10 * multiplier)} squats, ${Math.round(8 * multiplier)} incline or regular push-ups, ${Math.round(10 * multiplier)} hip hinges or glute bridges, ${Math.round(20 * multiplier)}-second plank, and ${Math.round(30 * multiplier)} seconds of marching in place.`,
+        construction: `For about ${workTime} minutes, rotate through ${rounds} rounds: ${Math.round(8 * multiplier)} step-ups per leg, ${Math.round(10 * multiplier)} backpack or dumbbell deadlifts, ${Math.round(20 * multiplier)} meters of farmer carry${shellText}, and ${Math.round(8 * multiplier)} supported rows per side.`,
+        swim: `Perform ${Math.max(8, Math.round(duration * 0.65))} minutes of easy-to-moderate swimming, cycling, brisk walking, or jogging. Every 2 minutes, include 20 seconds slightly faster, then return to an easy pace.`,
+        balance: `Complete ${rounds} rounds: ${Math.round(20 * multiplier)} seconds single-leg balance per side, ${Math.round(8 * multiplier)} slow reverse lunges per side, ${Math.round(20 * multiplier)} seconds heel-to-toe line walking, and ${Math.round(15 * multiplier)} seconds lateral shuffle each direction.`,
+        bees: `Complete ${rounds} rounds: 20 seconds quick feet, 20 seconds lateral shuffle, 20 seconds reaction drill using a timer/partner cue, then 60–90 seconds easy rest. Keep every cut controlled and quiet.`,
+        study: `Spend ${Math.max(10, Math.round(duration * 0.7))} distraction-free minutes studying a useful skill. Then write three notes: one thing learned, one technique cue, and one recovery habit for tomorrow.`,
+        recovery: `Do ${Math.max(10, Math.round(duration * 0.65))} minutes of easy walking, then 1–2 gentle rounds of ankle mobility, hip mobility, thoracic rotation, and light stretching. Finish by rating your energy from 1–10.`
+      };
+
+      return workouts[mission.id];
+    }
+
+    function createMission() {
+      const focus = document.getElementById("focus").value;
+      const duration = Number(document.getElementById("time").value);
+      const difficulty = Number(document.getElementById("difficulty").value);
+      const shellLoad = Number(document.getElementById("shellLoad").value);
+
+      const baseMission = chooseMission(focus);
+      const xp = Math.round(18 + difficulty * 8 + duration * 0.45 + shellLoad * 0.35);
+
+      currentMission = {
+        ...baseMission,
+        duration,
+        difficulty,
+        shellLoad,
+        xp,
+        workout: missionWorkout(baseMission, duration, difficulty, shellLoad)
+      };
+
+      const card = document.getElementById("missionCard");
+      card.innerHTML = `
+        <div class="mission-type">${currentMission.category}</div>
+        <h3>${currentMission.title}</h3>
+        <p>${currentMission.description}</p>
+        <div class="mission-details">
+          <span class="tag">${focusNames[focus]}</span>
+          <span class="tag">${duration} min</span>
+          <span class="tag">Difficulty ${difficulty}/5</span>
+          <span class="tag">Reward: +${xp} XP</span>
+        </div>
+        <p><strong>Roshi's assignment:</strong> ${currentMission.workout}</p>
+        <p class="safety-note"><strong>Safety rule:</strong> ${currentMission.safety}</p>
+      `;
+
+      document.getElementById("completeBtn").disabled = false;
+      document.getElementById("rerollBtn").disabled = false;
+    }
+
+    function updateStreak() {
+      const today = todayString();
+
+      if (data.lastCompletionDate === today) return;
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = yesterday.toISOString().slice(0, 10);
+
+      data.streak = data.lastCompletionDate === yesterdayString ? data.streak + 1 : 1;
+      data.lastCompletionDate = today;
+    }
+
+    function completeMission() {
+      if (!currentMission) return;
+
+      updateStreak();
+
+      data.xp += currentMission.xp;
+      data.sessions += 1;
+      data.completedToday += 1;
+
+      Object.entries(currentMission.stats).forEach(([stat, amount]) => {
+        const gain = Math.max(1, Math.round(amount * (0.65 + currentMission.difficulty * 0.2)));
+        data.stats[stat] = Math.min(20, data.stats[stat] + gain);
+      });
+
+      data.log.unshift({
+        title: currentMission.title,
+        date: new Date().toLocaleDateString(),
+        duration: currentMission.duration,
+        difficulty: currentMission.difficulty,
+        xp: currentMission.xp
+      });
+
+      data.log = data.log.slice(0, 20);
+
+      const card = document.getElementById("missionCard");
+      card.innerHTML = `
+        <div class="mission-type">Mission Complete</div>
+        <h3>Excellent work, student!</h3>
+        <p>
+          You gained <strong>+${currentMission.xp} XP</strong>. Roshi approves of
+          consistency more than reckless effort. Eat, hydrate, recover, and return ready
+          for the next lesson.
+        </p>
+        <div class="mission-details">
+          <span class="tag">Streak: ${data.streak} day${data.streak === 1 ? "" : "s"}</span>
+          <span class="tag">Power Level: ${getPowerLevel()}</span>
+        </div>
+        <p class="safety-note">
+          Do not repeat a hard session merely to raise the game score. Let performance,
+          soreness, sleep, and recovery guide your next mission.
+        </p>
+      `;
+
+      currentMission = null;
+      document.getElementById("completeBtn").disabled = true;
+      document.getElementById("rerollBtn").disabled = true;
+
+      render();
+    }
+
+    function resetTraining() {
+      const confirmed = confirm(
+        "Reset all Turtle School XP, attributes, streaks, and saved training logs?"
+      );
+
+      if (!confirmed) return;
+
+      data = structuredClone(defaultData);
+      currentMission = null;
+      localStorage.removeItem(STORAGE_KEY);
+
+      document.getElementById("missionCard").innerHTML = `
+        <div class="mission-type">Awaiting instruction</div>
+        <h3>Training data reset</h3>
+        <p>
+          Your scouter has been recalibrated. Generate a new mission when you are ready
+          to begin again.
+        </p>
+      `;
+
+      document.getElementById("completeBtn").disabled = true;
+      document.getElementById("rerollBtn").disabled = true;
+
+      render();
+    }
+
+    document.getElementById("generateBtn").addEventListener("click", createMission);
+    document.getElementById("rerollBtn").addEventListener("click", createMission);
+    document.getElementById("completeBtn").addEventListener("click", completeMission);
+    document.getElementById("resetBtn").addEventListener("click", resetTraining);
+
+    document.getElementById("difficulty").addEventListener("input", updateDifficultyValue);
+    document.getElementById("shellLoad").addEventListener("input", updateShellValue);
+
+    updateDifficultyValue();
+    updateShellValue();
+    render();
+  </script>
+</body>
+</html>

@@ -157,5 +157,197 @@ window.addEventListener("pagehide",function(){clearMission();clearShadow();stopC
 ensureWeek();updateField();updateDeep();shadowLevelValueEl.textContent=shadowLevelEl.value+" / 5";shadowButtons(true,false,false);setMissionButtons();refreshUI();
 })();
 </script>
+<!-- UNIVERSAL LOCAL DATA PORTABILITY — SMALL EXPANDER -->
+<script>
+(() => {
+  const FORMAT = "UNIVERSAL_WEB_APP_DATA";
+  const VERSION = 1;
+
+  function collectData() {
+    const data = {};
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+
+      if (key !== null) {
+        data[key] = localStorage.getItem(key);
+      }
+    }
+
+    return {
+      format: FORMAT,
+      version: VERSION,
+      exportedAt: new Date().toISOString(),
+      data: data
+    };
+  }
+
+  function exportData() {
+    const packageData = collectData();
+
+    const blob = new Blob(
+      [JSON.stringify(packageData, null, 2)],
+      { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download =
+      `${document.title || "web-app"}-data.json`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+  }
+
+  function importData(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      try {
+        const packageData = JSON.parse(reader.result);
+
+        if (
+          packageData.format !== FORMAT ||
+          !packageData.data
+        ) {
+          throw new Error("Invalid app data file.");
+        }
+
+        const confirmed = confirm(
+          "Restore this app data?\n\n" +
+          "Existing matching data will be replaced."
+        );
+
+        if (!confirmed) return;
+
+        Object.keys(packageData.data).forEach(key => {
+          localStorage.setItem(
+            key,
+            packageData.data[key]
+          );
+        });
+
+        alert("Data restored successfully.");
+        location.reload();
+
+      } catch (error) {
+        alert("Import failed: " + error.message);
+      }
+    };
+
+    reader.readAsText(file);
+  }
+
+  /* Hidden file picker */
+  const fileInput = document.createElement("input");
+
+  fileInput.type = "file";
+  fileInput.accept = ".json";
+  fileInput.style.display = "none";
+
+  document.body.appendChild(fileInput);
+
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files[0]) {
+      importData(fileInput.files[0]);
+    }
+
+    fileInput.value = "";
+  });
+
+  /* Small expandable control */
+  const wrapper = document.createElement("div");
+
+  wrapper.style.cssText = `
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    z-index: 2147483647;
+    font-family: sans-serif;
+  `;
+
+  const toggle = document.createElement("button");
+
+  toggle.textContent = "▸";
+
+  toggle.style.cssText = `
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.65);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+  `;
+
+  const menu = document.createElement("div");
+
+  menu.style.cssText = `
+    display: none;
+    position: absolute;
+    right: 0;
+    bottom: 34px;
+    background: rgba(0,0,0,0.85);
+    border-radius: 8px;
+    padding: 5px;
+    gap: 5px;
+    white-space: nowrap;
+  `;
+
+  const exportButton = document.createElement("button");
+  exportButton.textContent = "Export";
+
+  const importButton = document.createElement("button");
+  importButton.textContent = "Import";
+
+  [exportButton, importButton].forEach(button => {
+    button.style.cssText = `
+      border: none;
+      border-radius: 5px;
+      padding: 6px 9px;
+      background: white;
+      color: black;
+      font-size: 12px;
+      cursor: pointer;
+    `;
+  });
+
+  exportButton.onclick = exportData;
+  importButton.onclick = () => fileInput.click();
+
+  menu.appendChild(exportButton);
+  menu.appendChild(importButton);
+
+  toggle.onclick = () => {
+    const open = menu.style.display === "flex";
+
+    menu.style.display = open ? "none" : "flex";
+    toggle.textContent = open ? "▸" : "◂";
+  };
+
+  wrapper.appendChild(menu);
+  wrapper.appendChild(toggle);
+
+  document.body.appendChild(wrapper);
+
+  /* Public API */
+  window.UniversalData = {
+    export: exportData,
+    import: () => fileInput.click()
+  };
+
+})();
+</script>
 </body>
 </html>
